@@ -17,9 +17,6 @@ export class UserEntity extends BaseEntity{
     @Column()
     password: string;
 
-    @Column({ name: 'is_active', default: true })
-    isActive: boolean;
-
     //timestamps
     @Column({
         name: 'created_at',

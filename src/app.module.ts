@@ -1,6 +1,5 @@
 import AdminBro from 'admin-bro';
 import { Module } from '@nestjs/common';
-import { AdminModule } from '@admin-bro/nestjs';
 import { Database, Resource } from '@admin-bro/typeorm'
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from "./app.controller";
@@ -11,6 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 import { EmployeeModule } from './module/employee/employee.module';
 import {EmployeeEntity} from "./module/employee/employee.entity";
 import {UserEntity} from "./module/user/user.entity";
+import { AuthModule } from './module/auth/auth.module';
+import {AdminModule} from "@admin-bro/nestjs";
 
 const env = process.env;
 AdminBro.registerAdapter({ Database, Resource })
@@ -38,13 +39,15 @@ AdminBro.registerAdapter({ Database, Resource })
       adminBroOptions: {
         rootPath: '/admin',
         resources: [
-          // {resource: UserEntity}
-          {resource: PositionEntity}
+          {resource: UserEntity},
+          {resource: PositionEntity},
+          {resource: EmployeeEntity},
         ],
       }
     }),
     PositionModule,
     EmployeeModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService, Database],

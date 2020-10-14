@@ -39,7 +39,7 @@ export class PositionEntity extends BaseEntity{
             onDelete: "SET NULL"
         }
     )
-    @JoinColumn({name: 'chief_position_id'})
+    @JoinColumn({name: 'chiefPositionId'})
     chiefPosition?: PositionEntity;
 
     @OneToMany(() => PositionEntity, position => position.chiefPosition)
@@ -55,7 +55,7 @@ export class PositionEntity extends BaseEntity{
       user => user.createPositions,
       {onUpdate: "CASCADE"}
     )
-    @JoinColumn({name: 'admin_create_id'})
+    @JoinColumn({name: 'adminCreateId'})
     createAdmin: UserEntity;
 
     @Column({name: 'admin_update_id', type: 'integer', nullable: false})
@@ -68,7 +68,7 @@ export class PositionEntity extends BaseEntity{
       user => user.updatePositions,
       {onUpdate: "CASCADE"}
     )
-    @JoinColumn({name: 'admin_update_id'})
+    @JoinColumn({name: 'adminUpdateId'})
     updateAdmin: UserEntity;
 
 
