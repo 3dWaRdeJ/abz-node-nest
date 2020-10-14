@@ -33,18 +33,19 @@ AdminBro.registerAdapter({ Database, Resource })
         UserEntity
       ],
       synchronize: env.DB_SYNC? Boolean(env.DB_SYNC) : false,
-      logging: env.DB_LOGING ? Boolean(env.DB_LOGING) : false
+      // logging: env.DB_LOGING ? Boolean(env.DB_LOGING) : false
+      logging: true
     }),
-    AdminModule.createAdmin({
-      adminBroOptions: {
-        rootPath: '/admin',
-        resources: [
-          {resource: UserEntity},
-          {resource: PositionEntity},
-          {resource: EmployeeEntity},
-        ],
-      }
-    }),
+    // AdminModule.createAdmin({
+    //   adminBroOptions: {
+    //     rootPath: '/admin',
+    //     resources: [
+    //       {resource: UserEntity},
+    //       {resource: PositionEntity},
+    //       {resource: EmployeeEntity},
+    //     ],
+    //   }
+    // }),
     PositionModule,
     EmployeeModule,
     AuthModule

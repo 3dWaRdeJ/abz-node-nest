@@ -62,11 +62,11 @@ export class EmployeeEntity extends BaseEntity{
     employee => employee.subEmployees,
     {onUpdate: 'CASCADE', onDelete: 'SET NULL'}
   )
-  @JoinColumn({name: 'chiefId'})
+  @JoinColumn({name: 'chief_id'})
   chief?: EmployeeEntity;
 
   @ManyToOne(() => EmployeeEntity, employee => employee.chief)
-  @JoinColumn({name: 'chiefId'})
+  @JoinColumn({name: 'chief_id'})
   subEmployees: EmployeeEntity[];
 
   @Column({name: 'position_id', type: 'integer'})
@@ -76,10 +76,10 @@ export class EmployeeEntity extends BaseEntity{
 
   @ManyToOne(
     () => PositionEntity,
-    position => position.employees,
+    position => position.id,
     {onUpdate: "CASCADE"}
   )
-  @JoinColumn({name: 'positionId'})
+  @JoinColumn({name: 'position_id'})
   position: Position;
 
   @Column({name: 'admin_create_id', type: 'integer', nullable: false})
@@ -92,7 +92,7 @@ export class EmployeeEntity extends BaseEntity{
     user => user.createEmployees,
     {onUpdate: "CASCADE"}
   )
-  @JoinColumn({name: 'adminCreateId'})
+  @JoinColumn({name: 'admin_create_id'})
   createAdmin: UserEntity;
 
   @Column({name: 'admin_update_id', type: 'integer', nullable: false})
@@ -105,7 +105,7 @@ export class EmployeeEntity extends BaseEntity{
     user => user.updateEmployees,
     {onUpdate: 'CASCADE',}
   )
-  @JoinColumn({name: 'adminUpdateId'})
+  @JoinColumn({name: 'admin_update_id'})
   updateAdmin: UserEntity;
 
 

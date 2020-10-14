@@ -7,10 +7,11 @@ import {
     RelationId,
     ManyToOne,
     JoinColumn,
-    OneToMany
+    OneToMany, BeforeInsert, AfterLoad
 } from 'typeorm';
 import {UserEntity} from "../user/user.entity";
 import {EmployeeEntity} from "../employee/employee.entity";
+import {PositionService} from "./position.service";
 
 @Entity('positions')
 export class PositionEntity extends BaseEntity{
@@ -39,7 +40,7 @@ export class PositionEntity extends BaseEntity{
             onDelete: "SET NULL"
         }
     )
-    @JoinColumn({name: 'chiefPositionId'})
+    @JoinColumn({name: 'chief_position_id'})
     chiefPosition?: PositionEntity;
 
     @OneToMany(() => PositionEntity, position => position.chiefPosition)
@@ -55,7 +56,7 @@ export class PositionEntity extends BaseEntity{
       user => user.createPositions,
       {onUpdate: "CASCADE"}
     )
-    @JoinColumn({name: 'adminCreateId'})
+    @JoinColumn({name: 'admin_create_id', referencedColumnName: 'id'})
     createAdmin: UserEntity;
 
     @Column({name: 'admin_update_id', type: 'integer', nullable: false})
@@ -68,7 +69,7 @@ export class PositionEntity extends BaseEntity{
       user => user.updatePositions,
       {onUpdate: "CASCADE"}
     )
-    @JoinColumn({name: 'adminUpdateId'})
+    @JoinColumn({name: 'admin_update_id', referencedColumnName: 'id'})
     updateAdmin: UserEntity;
 
 
@@ -91,4 +92,11 @@ export class PositionEntity extends BaseEntity{
     //relation with EmployeeEntity
     @OneToMany(() => EmployeeEntity, employee => employee.position)
     employees: EmployeeEntity[];
+
+    @BeforeInsert()
+    setDefaultLevelIfNotSet() {
+        if (this.level === null) {
+            this.level = PositionEntity.MAX_LEVEL;
+        }
+    }
 }

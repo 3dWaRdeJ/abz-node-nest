@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import * as AuthDto from './auth.dto';
 import {UserEntity} from '../user/user.entity';
 import {AuthService} from './auth.service';
+import {ApiBearerAuth} from "@nestjs/swagger";
 
 @Controller()
 export class AuthController {
@@ -10,6 +11,7 @@ export class AuthController {
         private readonly authService: AuthService
     ) {}
 
+    @HttpCode(200)
     @Post('/register')
     async register(@Body()registerDto: AuthDto.RegisterDto): Promise<UserEntity> {
         return this.authService.register(registerDto);
@@ -23,6 +25,7 @@ export class AuthController {
     }
 
     @HttpCode(200)
+    @ApiBearerAuth()
     @UseGuards(AuthGuard('jwt'))
     @Post('/token')
     async token (@Request() req) {
