@@ -31,7 +31,7 @@ AdminBro.registerAdapter({ Database, Resource })
         EmployeeEntity,
         UserEntity
       ],
-      synchronize: true,
+      synchronize: env.DB_SYNC? Boolean(env.DB_SYNC) : false,
       logging: env.DB_LOGING ? Boolean(env.DB_LOGING) : false
     }),
     AdminModule.createAdmin({
