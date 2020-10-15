@@ -32,7 +32,7 @@ export class EmployeeEntity extends BaseEntity{
     default: () => 'NOW()'
   })
   @Index('start_date_IDX')
-  startDate: Date;
+  start_date: Date;
 
   @Column({name: 'phone', length: 16})
   @Index('phone_IDX')
@@ -43,19 +43,19 @@ export class EmployeeEntity extends BaseEntity{
   email: string;
 
   @Column({name: 'photo_path', nullable: true})
-  photoPath?: string;
+  photo_path?: string;
 
   @AfterLoad()
   setDefaultPhotoPathIfNull() {
-    if (this.photoPath === null) {
-      this.photoPath = EmployeeEntity.DEFAULT_PHOTO_PATH;
+    if (this.photo_path === null) {
+      this.photo_path = EmployeeEntity.DEFAULT_PHOTO_PATH;
     }
   }
 
   @Column({name: 'chief_id', type: 'integer', nullable: true})
   @RelationId((employee: EmployeeEntity) => employee.chief)
   @Index('chief_IDX')
-  chiefId?: number;
+  chief_id?: number;
 
   @ManyToOne(
     () => EmployeeEntity,
@@ -72,12 +72,12 @@ export class EmployeeEntity extends BaseEntity{
   @Column({name: 'position_id', type: 'integer'})
   @RelationId((employee: EmployeeEntity) => employee.position)
   @Index('position_id_IDX')
-  positionId: number;
+  position_id: number;
 
   @ManyToOne(
     () => PositionEntity,
     position => position.id,
-    {onUpdate: "CASCADE"}
+    {onUpdate: "CASCADE", onDelete: "CASCADE"}
   )
   @JoinColumn({name: 'position_id'})
   position: Position;
@@ -85,7 +85,7 @@ export class EmployeeEntity extends BaseEntity{
   @Column({name: 'admin_create_id', type: 'integer', nullable: false})
   @RelationId((employee: EmployeeEntity) => employee.createAdmin)
   @Index('admin_create_IDX')
-  adminCreateId: number;
+  admin_create_id: number;
 
   @ManyToOne(
     () => UserEntity,
@@ -98,7 +98,7 @@ export class EmployeeEntity extends BaseEntity{
   @Column({name: 'admin_update_id', type: 'integer', nullable: false})
   @RelationId((employee: EmployeeEntity) => employee.updateAdmin)
   @Index('admin_update_IDX')
-  adminUpdateId: number;
+  admin_update_id: number;
 
   @ManyToOne(
     () => UserEntity,
@@ -115,7 +115,7 @@ export class EmployeeEntity extends BaseEntity{
     type: 'datetime',
     default: () => 'NOW()'
   })
-  createdAt: Date;
+  created_at: Date;
 
   @Column({
     name: 'updated_at',
@@ -123,5 +123,5 @@ export class EmployeeEntity extends BaseEntity{
     default: () => 'NOW()',
     onUpdate: 'NOW()'
   })
-  updatedAt: Date;
+  updated_at: Date;
 }

@@ -1,22 +1,24 @@
 import {
-  IsNotEmpty, IsOptional, Max,
-  MaxLength, Min,
+  IsInt, IsOptional,
+  Max,
+  MaxLength,
+  Min,
 } from 'class-validator'
-import {ApiProperty, ApiQuery} from '@nestjs/swagger';
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import {PositionEntity} from "./position.entity";
 
 export class CreateDto {
-  @ApiProperty({required: true})
-  @IsNotEmpty()
+  @ApiProperty()
   @MaxLength(255)
   name: string;
 
+  @ApiPropertyOptional({required: true, type: "integer"})
   @IsOptional()
-  @ApiProperty({required: true, type: "integer"})
+  @IsInt()
   chief_position_id: number;
 
+  @ApiPropertyOptional({type:"integer"})
   @IsOptional()
-  @ApiProperty({required: false, type:"integer"})
   @Min(1)
   @Max(PositionEntity.MAX_LEVEL)
   level?: number

@@ -7,11 +7,11 @@ import {
     RelationId,
     ManyToOne,
     JoinColumn,
-    OneToMany, BeforeInsert, AfterLoad
+    OneToMany,
+    BeforeInsert, BeforeUpdate
 } from 'typeorm';
 import {UserEntity} from "../user/user.entity";
 import {EmployeeEntity} from "../employee/employee.entity";
-import {PositionService} from "./position.service";
 
 @Entity('positions')
 export class PositionEntity extends BaseEntity{
@@ -29,7 +29,7 @@ export class PositionEntity extends BaseEntity{
     @Column({name: 'chief_position_id', type: 'integer', nullable: true})
     @RelationId((position: PositionEntity) => position.chiefPosition)
     @Index('chief_position_IDX')
-    chiefPositionId?: number;
+    chief_position_id?: number;
 
     //relation with chief position(Position Entity)
     @ManyToOne(
@@ -49,7 +49,7 @@ export class PositionEntity extends BaseEntity{
     @Column({name: 'admin_create_id', type: 'integer', nullable: false})
     @RelationId((position: PositionEntity) => position.createAdmin)
     @Index('admin_create_IDX')
-    adminCreateId: number;
+    admin_create_id: number;
 
     @ManyToOne(
       () => UserEntity,
@@ -62,7 +62,7 @@ export class PositionEntity extends BaseEntity{
     @Column({name: 'admin_update_id', type: 'integer', nullable: false})
     @RelationId((position: PositionEntity) => position.updateAdmin)
     @Index('admin_update_IDX')
-    adminUpdateId: number;
+    admin_update_id: number;
 
     @ManyToOne(
       () => UserEntity,
@@ -79,7 +79,7 @@ export class PositionEntity extends BaseEntity{
         type: 'datetime',
         default: () => 'NOW()'
     })
-    createdAt: Date;
+    created_at: Date;
 
     @Column({
         name: 'updated_at',
@@ -87,13 +87,15 @@ export class PositionEntity extends BaseEntity{
         default: () => 'NOW()',
         onUpdate: 'NOW()'
     })
-    updatedAt: Date;
+    updated_at: Date;
 
     //relation with EmployeeEntity
     @OneToMany(() => EmployeeEntity, employee => employee.position)
     employees: EmployeeEntity[];
 
+    //add level to position if forget set
     @BeforeInsert()
+    @BeforeUpdate()
     setDefaultLevelIfNotSet() {
         if (this.level === null) {
             this.level = PositionEntity.MAX_LEVEL;

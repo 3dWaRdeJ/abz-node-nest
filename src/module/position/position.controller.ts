@@ -10,11 +10,12 @@ import {
   Query,
   Req,
   UseGuards,
-  ValidationPipe
+  ValidationPipe,
+  DefaultValuePipe, BadRequestException
 } from '@nestjs/common';
 import {PositionService} from "./position.service";
 import {PositionEntity} from "./position.entity";
-import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiBody, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
 import * as PositionDto from './position.dto';
 import {AuthGuard} from "@nestjs/passport";
 
@@ -30,10 +31,10 @@ export class PositionController {
 
   @Get()
   @ApiResponse({status: 200, description: 'Result records'})
+  @ApiQuery({name: 'skip', schema: {required: ['false']}})
   async getPositions(
-    @Query('skip', new ValidationPipe({transform: true})) skip: number,
-    @Query('take', new ValidationPipe({transform: true})) take: number,
-    @Req() req
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip: number,
+    @Query('take', new DefaultValuePipe(20), ParseIntPipe) take: number,
   ): Promise<PositionEntity[]> {
     return this.positionService.find(take, skip);
   }
@@ -45,7 +46,11 @@ export class PositionController {
     @Req() req
   ): Promise<PositionEntity> {
     const position = Object.assign(new PositionEntity(), createDto, {adminCreateId: req.user.id, adminUpdateId: req.user.id});
-    return this.positionService.save(position);
+    position.chiefPosition = createDto.chief_position_id
+      ? await this.positionService.checkIfExist(createDto.chief_position_id)
+      : null;
+
+    return this.positionService.createWithValidation(position);
   }
 
   @Patch(':id')
@@ -55,9 +60,13 @@ export class PositionController {
     @Body() updateDto: PositionDto.CreateDto,
     @Req() req
   ): Promise<PositionEntity> {
-    let position = await this.positionService.findById(id);
-    position = Object.assign(position, updateDto, {adminUpdateId: req.user.id});
-    return this.positionService.save(position);
+    let position = await this.positionService.checkIfExist(id, {relations: ['subPositions']});
+    const oldChiefPosId = position.chief_position_id;
+    position = Object.assign(position, updateDto, {admin_update_id: req.user.id});
+    position = await this.positionService.updateWithValidation(position, oldChiefPosId);
+    delete position.subPositions;
+    delete position.chiefPosition;
+    return position;
   }
 
   @Get(':id')
@@ -65,12 +74,13 @@ export class PositionController {
   async getPosition(
     @Param('id', ParseIntPipe) id: number
   ): Promise<PositionEntity> {
-    return this.positionService.findById(id);
+    return this.positionService.checkIfExist(id);
   }
 
   @Delete(':id')
   @ApiResponse({status: 200, description: 'Delete record by id'})
   async deletePosition(@Param('id', ParseIntPipe) id: number) {
+    await this.positionService.checkIfExist(id);
     return this.positionService.remove(id);
   }
 }

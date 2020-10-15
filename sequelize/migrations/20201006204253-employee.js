@@ -51,7 +51,8 @@ module.exports = {
           model: 'positions',
           key: 'id'
         },
-        onUpdate: 'cascade'
+        onUpdate: 'cascade',
+        onDelete: 'cascade'
       },
       'admin_create_id': {
         allowNull: false,
