@@ -29,8 +29,8 @@ export class EmployeeService {
     return this.employeeRepository.findOneOrFail(id, findOptions)
   }
 
-  private async save(employee): Promise<EmployeeEntity> {
-    return this.employeeRepository.save(employee, {reload: true});
+  async save(employee): Promise<EmployeeEntity> {
+    return this.employeeRepository.save(employee);
   }
 
   async remove(id: number): Promise<void> {
@@ -88,7 +88,7 @@ export class EmployeeService {
     return this.save(employee);
   }
 
-  async updateWithValidation(employee: EmployeeEntity, oldPositionId): Promise<EmployeeEntity> {
+  async updateWithValidation(employee: EmployeeEntity, oldPositionId?: number): Promise<EmployeeEntity> {
     await this.validateEmployee(employee);
 
     //if ids old & new posId different - delete chief id for subEmployees

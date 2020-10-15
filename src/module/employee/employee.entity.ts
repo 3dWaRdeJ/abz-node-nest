@@ -7,14 +7,17 @@ import {
   RelationId,
   ManyToOne,
   JoinColumn,
-  AfterLoad, BeforeUpdate, OneToMany
+  AfterLoad, OneToMany
 } from 'typeorm';
 import {PositionEntity} from "../position/position.entity";
 import {UserEntity} from "../user/user.entity";
+import * as fs from 'fs';
+import * as path from 'path'
 
 @Entity('employees')
 export class EmployeeEntity extends BaseEntity{
-  static DEFAULT_PHOTO_PATH = '/img/default.png';
+  static DEFAULT_PHOTO_DIR = '/img';
+  static DEFAULT_PHOTO_PATH = EmployeeEntity.DEFAULT_PHOTO_DIR + '/default.png';
   static MAX_SALARY = 500000;
 
   @PrimaryGeneratedColumn()
@@ -125,4 +128,18 @@ export class EmployeeEntity extends BaseEntity{
     default: () => 'NOW() ON UPDATE NOW()'
   })
   updated_at: Date;
+
+  deletePhoto(publicDir: string) {
+    if (this.photo_path !== null && this.photo_path !== EmployeeEntity.DEFAULT_PHOTO_PATH) {
+      if (fs.existsSync(path.join(publicDir, this.photo_path))) {
+        fs.unlinkSync(path.join(publicDir, this.photo_path));
+      }
+    }
+    this.photo_path = null;
+  }
+
+  updatePhoto(publicDir: string, filename: string) {
+    this.deletePhoto(publicDir);
+    this.photo_path = path.join(EmployeeEntity.DEFAULT_PHOTO_DIR, filename);
+  }
 }

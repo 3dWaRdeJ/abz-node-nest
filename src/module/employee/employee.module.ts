@@ -4,6 +4,7 @@ import {EmployeeEntity} from "./employee.entity";
 import {EmployeeService} from "./employee.service";
 import { EmployeeController } from './employee.controller';
 import {PositionEntity} from "../position/position.entity";
+import {MulterModule} from "@nestjs/platform-express";
 
 @Module({
   imports: [

@@ -1,21 +1,65 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
   Delete,
-  Get,
+  Get, NotFoundException,
   Param,
   ParseIntPipe, Patch,
   Post,
-  Query, Req,
-  UseGuards
+  Query, Req, UploadedFiles,
+  UseGuards, UseInterceptors,
 } from '@nestjs/common';
-import {ApiBearerAuth, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {AuthGuard} from "@nestjs/passport";
 import {EmployeeService} from "./employee.service";
 import {EmployeeEntity} from "./employee.entity";
 import * as EmployeeDto from './employee.dto';
 import {FilesInterceptor} from "@nestjs/platform-express";
+import {Observable} from "rxjs";
+import * as path from 'path';
+import {MulterOptions} from "@nestjs/platform-express/multer/interfaces/multer-options.interface";
+import * as multer from 'multer'
+import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
+import {EntityNotFoundError} from "typeorm/error/EntityNotFoundError";
+import * as sizeOf from 'image-size';
+
+//image format filter
+const photoFilter = (req, file, callback) => {
+  let isValid = true;
+  let error = null;
+  if (file.mimetype !== 'image/png' && file.mimetype !== 'image/jpg') {
+    const message = 'Invalid file type, allow only image/png and image/jpg';
+    req.fileValidationError = message;
+    error = new BadRequestException(message);
+    isValid = false;
+  }
+  return callback(error, isValid);
+}
+
+const publicDir = path.join(__dirname, '..', '..', '..', 'public');
+//options for image
+const fileOptions: MulterOptions = {
+  fileFilter: photoFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
+  storage: multer.diskStorage({
+    destination: path.resolve(path.join(publicDir, 'img')),
+    filename: (req, file, callback) => {
+      try {
+        const filename: string = uuidv4();
+        const ext: string = path.parse(file.originalname).ext;
+
+        callback(null, `${filename}${ext}`);
+      } catch (err) {
+        callback(err, '');
+      }
+    }
+  })
+}
 
 @ApiBearerAuth()
 @ApiTags('Employee')
@@ -81,6 +125,32 @@ export class EmployeeController {
 
     employee = await this.employeeService.updateWithValidation(employee, oldPositionId);
     return employee;
+  }
+
+  @Post(':id/file')
+  @ApiResponse({status: 200, description: 'upload employee photo'})
+  @UseInterceptors(FilesInterceptor('photo', 1, fileOptions))
+  async uploadPhoto(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles() photo,
+  ): Promise<EmployeeEntity> {
+    try {
+      // @ts-ignore
+      const dimension = sizeOf(photo[0].path);
+      if (dimension.width < 300 || dimension.height < 300) {
+        throw new BadRequestException(['photo wrong dimension, must be 300x300px']);
+      }
+      const employee = await this.employeeService.checkIfExist(id);
+      employee.updatePhoto(publicDir, photo[0].filename);
+      await this.employeeService.save(employee);
+      return await this.employeeService.findById(id);
+    } catch (err) {
+      fs.unlinkSync(photo[0].path);
+      if (err instanceof EntityNotFoundError) {
+        throw new NotFoundException([`id employee with id=${id} not found`]);
+      }
+      throw err;
+    }
   }
 
   @Delete(':id')
