@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryGeneratedColumn, BaseEntity, Index, OneToMany} from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, BaseEntity, Index, OneToMany, BeforeUpdate} from 'typeorm';
 import {PositionEntity} from "../position/position.entity";
 import {EmployeeEntity} from "../employee/employee.entity";
 
@@ -23,15 +23,19 @@ export class UserEntity extends BaseEntity{
         type: 'datetime',
         default: () => 'NOW()'
     })
-    createdAt: Date;
+    created_at: Date;
 
     @Column({
         name: 'updated_at',
         type: 'datetime',
-        default: () => 'NOW()',
-        onUpdate: 'NOW()'
+        default: () => 'NOW() ON UPDATE NOW()'
     })
-    updatedAt: Date;
+    updated_at: Date;
+
+    @BeforeUpdate()
+    updateDate() {
+        this.created_at = new Date();
+    }
 
     @OneToMany(() => PositionEntity, position => position.createAdmin)
     createPositions: Position[];

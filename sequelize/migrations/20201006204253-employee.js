@@ -83,7 +83,6 @@ module.exports = {
         defaultValue: Sequelize.literal('NOW() ON UPDATE NOW()')
       }
     }, {
-      timestamps: false,
       charset: 'utf8mb4',
       collate: 'utf8mb4_unicode_ci'
     });

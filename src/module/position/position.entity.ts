@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import {UserEntity} from "../user/user.entity";
 import {EmployeeEntity} from "../employee/employee.entity";
+import {Req} from "@nestjs/common";
 
 @Entity('positions')
 export class PositionEntity extends BaseEntity{
@@ -84,8 +85,7 @@ export class PositionEntity extends BaseEntity{
     @Column({
         name: 'updated_at',
         type: 'datetime',
-        default: () => 'NOW()',
-        onUpdate: 'NOW()'
+        default: () => 'NOW() ON UPDATE NOW()'
     })
     updated_at: Date;
 

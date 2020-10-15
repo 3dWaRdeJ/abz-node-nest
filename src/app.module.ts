@@ -12,6 +12,8 @@ import {EmployeeEntity} from "./module/employee/employee.entity";
 import {UserEntity} from "./module/user/user.entity";
 import { AuthModule } from './module/auth/auth.module';
 import {AdminModule} from "@admin-bro/nestjs";
+import {ServeStaticModule} from "@nestjs/serve-static";
+import { join } from 'path';
 
 const env = process.env;
 AdminBro.registerAdapter({ Database, Resource })
@@ -32,9 +34,11 @@ AdminBro.registerAdapter({ Database, Resource })
         EmployeeEntity,
         UserEntity
       ],
-      synchronize: env.DB_SYNC? Boolean(env.DB_SYNC) : false,
-      // logging: env.DB_LOGING ? Boolean(env.DB_LOGING) : false
-      logging: true
+      synchronize: env.DB_SYNC === 'true',
+      logging: env.DB_LOGING === 'true'
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
     }),
     // AdminModule.createAdmin({
     //   adminBroOptions: {

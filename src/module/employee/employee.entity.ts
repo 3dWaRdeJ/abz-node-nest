@@ -7,7 +7,7 @@ import {
   RelationId,
   ManyToOne,
   JoinColumn,
-  AfterLoad
+  AfterLoad, BeforeUpdate, OneToMany
 } from 'typeorm';
 import {PositionEntity} from "../position/position.entity";
 import {UserEntity} from "../user/user.entity";
@@ -15,12 +15,14 @@ import {UserEntity} from "../user/user.entity";
 @Entity('employees')
 export class EmployeeEntity extends BaseEntity{
   static DEFAULT_PHOTO_PATH = '/img/default.png';
+  static MAX_SALARY = 500000;
+
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({name: 'full_name', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci'})
   @Index('full_name_IDX')
-  fullName: string;
+  full_name: string;
 
   @Column({type: 'float'})
   @Index('salary_IDX')
@@ -65,7 +67,7 @@ export class EmployeeEntity extends BaseEntity{
   @JoinColumn({name: 'chief_id'})
   chief?: EmployeeEntity;
 
-  @ManyToOne(() => EmployeeEntity, employee => employee.chief)
+  @OneToMany(() => EmployeeEntity, employee => employee.chief)
   @JoinColumn({name: 'chief_id'})
   subEmployees: EmployeeEntity[];
 
@@ -80,7 +82,7 @@ export class EmployeeEntity extends BaseEntity{
     {onUpdate: "CASCADE", onDelete: "CASCADE"}
   )
   @JoinColumn({name: 'position_id'})
-  position: Position;
+  position: PositionEntity;
 
   @Column({name: 'admin_create_id', type: 'integer', nullable: false})
   @RelationId((employee: EmployeeEntity) => employee.createAdmin)
@@ -120,8 +122,7 @@ export class EmployeeEntity extends BaseEntity{
   @Column({
     name: 'updated_at',
     type: 'datetime',
-    default: () => 'NOW()',
-    onUpdate: 'NOW()'
+    default: () => 'NOW() ON UPDATE NOW()'
   })
   updated_at: Date;
 }

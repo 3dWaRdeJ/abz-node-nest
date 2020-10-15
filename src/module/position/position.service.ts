@@ -1,27 +1,32 @@
-import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {ConflictException, Injectable, NotFoundException, UnprocessableEntityException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {FindOneOptions, Repository} from 'typeorm';
+import {FindManyOptions, FindOneOptions, Repository} from 'typeorm';
 import { PositionEntity } from './position.entity';
+import {EntityNotFoundError} from "typeorm/error/EntityNotFoundError";
 import {EmployeeEntity} from "../employee/employee.entity";
-import {EmployeeService} from "../employee/employee.service";
 
 @Injectable()
 export class PositionService {
   constructor(
     @InjectRepository(PositionEntity)
     private positionRepository: Repository<PositionEntity>,
-    private readonly employeeService: EmployeeService
+    @InjectRepository(EmployeeEntity)
+    private employeeRepository: Repository<EmployeeEntity>
   ) {}
 
-  find(take?: number, skip?: number): Promise<PositionEntity[]> {
-    return this.positionRepository.find({take: take, skip: skip});
+  async find(findOptions: FindManyOptions): Promise<PositionEntity[]> {
+    return this.positionRepository.find(findOptions);
+  }
+
+  findByIdOrFail(id: number, findOptions?: FindOneOptions) {
+    return this.positionRepository.findOneOrFail(id, findOptions);
   }
 
   findById(id: number, findOptions?: FindOneOptions): Promise<PositionEntity> {
     return this.positionRepository.findOne(id, findOptions);
   }
 
-  async save(position): Promise<PositionEntity> {
+  private async save(position): Promise<PositionEntity> {
     return this.positionRepository.save(position);
   }
 
@@ -30,11 +35,14 @@ export class PositionService {
   }
 
   async checkIfExist(id: number, findOptions?: FindOneOptions): Promise<PositionEntity> {
-    const position = await this.findById(id, findOptions);
-    if (!(position instanceof PositionEntity)) {
-      throw new NotFoundException(`Position with id=${id} not found`);
+    try {
+      return await this.findByIdOrFail(id, findOptions);
+    } catch (err) {
+      if (err instanceof EntityNotFoundError) {
+        throw new UnprocessableEntityException(`Position with id=${id} not found`)
+      }
+      throw err;
     }
-    return position;
   }
 
   async createWithValidation(position: PositionEntity): Promise<PositionEntity> {
@@ -51,7 +59,7 @@ export class PositionService {
       const subPositionsIds = position.subPositions.map((position: PositionEntity) => position.id);
 
       //delete relations with chiefs for low level employees in subPositions
-      await this.employeeService.setChiefIdByPosition(null, subPositionsIds);
+      await this.setEmployeeChiefIdByPositions(null, subPositionsIds);
 
       //delete relation with chief position for low level positions(subPositions)
       await this.positionRepository.createQueryBuilder()
@@ -61,12 +69,21 @@ export class PositionService {
         .execute();
     }
 
-    return await this.save(position);
+    await this.save(position);
+    return position = await this.findById(position.id);
+  }
+
+  async setEmployeeChiefIdByPositions(chiefId: number | null, positionId: number[]) {
+    await this.employeeRepository.createQueryBuilder()
+      .update()
+      .set({chief_id: chiefId})
+      .where("position_id IN(:...posId)", {posId: positionId})
+      .execute();
   }
 
   async validateChiefPosition(position: PositionEntity): Promise<PositionEntity> {
     //add chief position to field, if not set
-    if (!position.chiefPosition && position.chief_position_id) {
+    if (!position.chiefPosition && typeof position.chief_position_id === 'number') {
       position.chiefPosition = await this.checkIfExist(position.chief_position_id);
     }
 

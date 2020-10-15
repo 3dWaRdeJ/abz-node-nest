@@ -12,9 +12,10 @@ export class CreateDto {
   @MaxLength(255)
   name: string;
 
-  @ApiPropertyOptional({required: true, type: "integer"})
+  @ApiPropertyOptional({ type: "integer"})
   @IsOptional()
   @IsInt()
+  @Min(1)
   chief_position_id: number;
 
   @ApiPropertyOptional({type:"integer"})

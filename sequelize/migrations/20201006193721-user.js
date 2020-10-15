@@ -33,8 +33,11 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('NOW() ON UPDATE NOW()')
       }
+    }, {
+      timestamp: false,
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci',
     });
-    await queryInterface.sequelize.query(`ALTER TABLE ${tableName} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`)
   },
 
   down: async (queryInterface, Sequelize) => {
