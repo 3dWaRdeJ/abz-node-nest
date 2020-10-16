@@ -1,0 +1,463 @@
+{% extends "./layout/app.twig" %}
+
+{% block head %}
+    <!-- DataTables -->
+    <link rel="stylesheet" href="/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/admin-lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+{% endblock %}
+
+{% block conent %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Positions</h3>
+                <div class="project-actions text-right">
+                    <button id="openCreateModal" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createModal">
+                        <i class="fas fa-plus"></i>
+                        Add position
+                    </button>
+                </div>
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="positionsTable" class="table table-bordered table-striped projects">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Last update</th>
+                        <th>Chief position id</th>
+                        <th>Chief position name</th>
+                        <th>Chief position level</th>
+                        <th>Chief position last update</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Last update</th>
+                        <th>Chief position id</th>
+                        <th>Chief position name</th>
+                        <th>Chief position level</th>
+                        <th>Chief position last update</th>
+                        <th>Action</th>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.col -->
+</div>
+<!-- Remove Modal -->
+<div class="modal fade" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeModalLabel">Remove employee</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="removeModal-text">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="removeButton" class="btn btn-primary">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add position</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form role="form" id="createForm">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="inputCreateName">Position name</label>
+                        <input type="text" name="name" class="form-control" id="inputCreateName" placeholder="Enter position name" maxlength="255">
+                        <div class="float-right text-right" id="inputCreateName-length"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Chief positions</label>
+                        <select id="selectCreateChiefPosition" name="chief_position_id" class="form-control" style="width: 100%;">
+                            <option value="" selected>No chief position</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="createLevel-group">
+                        <label>Level</label>
+                        <select id="selectCreateLevel" name="level" class="form-control" style="width: 100%;">
+                            <option value="5" selected>5</option>
+                            <option value="4">4</option>
+                            <option value="3">3</option>
+                            <option value="2">2</option>
+                            <option value="1">1</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Update position</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form role="form" id="updateForm">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="inputCreateName">Position name</label>
+                            <input type="text" name="name" class="form-control" id="inputUpdateName" placeholder="Enter position name" maxlength="255">
+                            <div class="float-right text-right" id="inputUpdateName-length"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Chief positions</label>
+                            <select id="selectUpdateChiefPosition" name="chief_position_id" class="form-control" style="width: 100%;">
+                                <option value="" selected>No chief position</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="updateLevel-group">
+                            <label>Level</label>
+                            <select id="selectUpdateLevel" name="level" class="form-control" style="width: 100%;">
+                                <option value="5" selected>5</option>
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}}
+    <!-- DataTables -->
+    <script src="/admin-lte/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/admin-lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/admin-lte/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/admin-lte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+
+    <script type="text/javascript">
+
+      const nameRule = {
+        minlength: 3,
+        maxlength: 255,
+        required: true
+      };
+
+      const validatorOptions = {
+        rules: {
+          name: nameRule,
+          chief_position_id: {
+            required: false,
+          },
+          level: {
+            required: false,
+            min: 1,
+            max: 5
+          }
+        },
+        messages: {
+          name: {
+            required: "Please enter a position name",
+          }
+        },
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+          error.addClass('invalid-feedback');
+          element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+          $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+          $(element).removeClass('is-invalid');
+        }
+      }
+
+      const positionTable = $('#positionsTable');
+      let removePosId = null;
+      let allPositions = [];
+
+
+      const createForm = $('#createForm');
+      const inputCreateName = $('#inputCreateName');
+      const inputCreateNameLength = $('#inputCreateName-length');
+      const selectCreateChief = $('#selectCreateChiefPosition');
+      const selectCreateLevel = $('#selectCreateLevel');
+      const createLevelGroup = $('#createLevel-group');
+
+
+      const updateForm = $('#updateForm');
+      const inputUpdateName = $('#inputUpdateName');
+      const inputUpdateNameLength = $('#inputUpdateName-length');
+      const selectUpdateChief = $('#selectUpdateChiefPosition');
+      const selectUpdateLevel = $('#selectUpdateLevel');
+      const updateLevelGroup = $('#updateLevel-group');
+
+
+      const removeButton = $('#removeButton');
+      const removePosText = $('#removeModal-text');
+
+      function downloadPositions(start = 0, length = 200) {
+        $.ajax({
+          type: 'GET',
+          url: '/api/v1/position?' + $.param({start: start, length:length}),
+          contentType: 'application/json',
+          success: function(response) {
+            let test = 's';
+            for (const position of response.data) {
+              allPositions[position.id] = position;
+              const option = createHTMLOption(position.id, position.name + "  &mdash;  " + position.id);
+              selectCreateChief.append(option)
+              selectUpdateChief.append(option)
+            }
+            if (response.data.length === length) {
+              downloadPositions(start + length, length);
+            }
+          }
+        })
+      }
+      downloadPositions();
+
+      function createHTMLOption(value, text) {
+        return '<option value="' + value + '">' + text + '</option>';
+      }
+
+      function createHTMLUpdateButton(id) {
+        return '<button class="btn btn-info btn-sm" onclick="openUpdateModal(' + id + ')" data-toggle="modal" data-target="#updateModal">' +
+          '<i class="fas fa-pencil-alt"></i>' +
+          '</button>'
+      }
+
+      function createHTMLRemoveButton(id) {
+        return '<button type="button" onclick="openRemoveModal(' + id + ')" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#removeModal">' +
+          '<i class="fas fa-trash"></i>' +
+          '</button>'
+      }
+
+      //create action buttons
+      function createHTMLForAction(id) {
+        let updateButton = createHTMLUpdateButton(id);
+        let removeButton = createHTMLRemoveButton(id);
+        return updateButton + removeButton;
+      }
+
+      function modifyPositions(positions) {
+        positions.forEach(function(position, i, employees) {
+          position = modifyPosition(position);
+        })
+        return positions;
+      }
+
+      function modifyPosition(position) {
+        position.action = createHTMLForAction(position.id);
+        if (position.chiefPosition === null) {
+          position.chiefPosition = {
+            id: '',
+            name: '',
+            level: '',
+            updated_at: ''
+          };
+        } else {
+          position.chiefPosition.updated_at = new Date(position.updated_at).format('yyyy-MM-dd HH:mm:ss');
+          position.chiefPosition.created_at = new Date(position.created_at).format('yyyy-MM-dd HH:mm:ss');
+        }
+        position.updated_at = new Date(position.updated_at).format('yyyy-MM-dd HH:mm:ss');
+        position.created_at = new Date(position.created_at).format('yyyy-MM-dd HH:mm:ss');
+        return position;
+      }
+
+      function openUpdateModal(id) {
+        let positions = positionTable.DataTable().data();
+        let updatePosition = null;
+        for ([key,position] of Object.entries(positions)) {
+          if (position.id === id) {
+            updatePosition = position;
+            inputUpdateName.val(updatePosition.name);
+            inputCreateNameLength.text(inputCreateName.val().length + '/' + nameRule.maxlength);
+            selectUpdateChief.val(updatePosition.chief_position_id ?? "");
+            selectUpdateLevel.val(updatePosition.level);
+            if (updatePosition.chief_position_id === null) {
+              selectUpdateLevel.show();
+            } else {
+              selectCreateLevel.hide();
+            }
+            break;
+          }
+        }
+      }
+
+      function openRemoveModal(id) {
+        let positions = positionTable.DataTable().data();
+        let removePosition = null;
+        for ([key,position] of Object.entries(positions)) {
+          if (position.id === id) {
+            removePosition = position;
+            removePosText.text('Are you sure want to remove position ' + removePosition.name);
+            removePosId = removePosition.id;
+            break;
+          }
+        }
+      }
+
+      //remove position
+      removeButton.on('click', () => {
+        $.ajax({
+          url: '/api/v1/position/' + removePosId,
+          type: 'DELETE',
+          success: (response) => {
+            positionTable.DataTable().ajax.reload();
+            $('#removeModal').modal('hide');
+          },
+        })
+      })
+
+      //show name length
+      $(document).ready(() => {
+        inputCreateNameLength.text(inputCreateName.val().length + '/' + nameRule.maxlength);
+
+        inputUpdateNameLength.text(inputUpdateName.val().length + '/' + nameRule.maxlength);
+        updateLevelGroup.hide();
+      })
+
+      inputCreateName.on('input change', function() {
+        inputCreateNameLength.text(inputCreateName.val().length + '/' + nameRule.maxlength);
+      })
+      inputUpdateName.on('input change', function() {
+        inputUpdateNameLength.text(inputUpdateName.val().length + '/' + nameRule.maxlength);
+      })
+
+      selectCreateChief.on('input change', () => {
+        if (selectCreateChief.val() === "") {
+          createLevelGroup.show();
+        } else {
+          createLevelGroup.hide();
+        }
+      });
+
+      selectUpdateChief.on('input change', () => {
+        if (selectUpdateChief.val() === "") {
+          updateLevelGroup.show();
+        } else {
+          updateLevelGroup.hide();
+        }
+      });
+
+      createForm.validate(
+        Object.assign(validatorOptions, {
+          //create position
+          submitHandler: function () {
+            $.ajax({
+              url: '/api/v1/position',
+              type: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              data: JSON.stringify({
+                name: inputCreateName.val(),
+                chief_position_id: selectCreateChief.val() === "" ? null: parseInt(selectCreateChief.val()),
+                level: parseInt(selectCreateLevel.val())
+              }),
+              success: (response) => {
+                positionTable.DataTable().ajax.reload();
+                $('#createModal').modal('hide');
+              }
+            })
+          },
+        })
+      );
+
+      updateForm.validate(Object.assign(
+        validatorOptions,
+        {
+          submitHandler: () => {
+            $.ajax({
+              url: '/api/v1/position',
+              type: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              data: JSON.stringify({
+                name: inputUpdateName.val(),
+                chief_position_id: selectUpdateChief.val() === "" ? null: parseInt(selectUpdateChief.val()),
+                level: parseInt(selectUpdateLevel.val())
+              }),
+              success: (response) => {
+                positionTable.DataTable().ajax.reload();
+                $('#updateModal').modal('hide');
+              }
+            })
+          }
+        }
+      ))
+
+      positionTable.DataTable({
+        autoWidth: true,
+        responsive: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+          url:"/api/v1/position",
+          headers: {
+            // Authorization: 'test'
+          },
+          dataSrc: (json) => {
+            return modifyPositions(json.data);
+          }
+        },
+        columns: [
+          {data: 'id'},
+          {data: 'name'},
+          {data: 'level'},
+          {data: 'updated_at'},
+          {data: 'chiefPosition.id', searchable: false, orderable: false},
+          {data: 'chiefPosition.name', searchable: false, orderable: false},
+          {data: 'chiefPosition.level', searchable: false, orderable: false},
+          {data: 'chiefPosition.updated_at', searchable: false, orderable: false},
+          {data: 'action', searchable: false, orderable: false}
+        ],
+        order: [[0, 'asc']]
+      })
+    </script>
+{% endblock %}

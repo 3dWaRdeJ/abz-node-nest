@@ -7,18 +7,19 @@ import {
   ParseIntPipe,
   Post,
   Patch,
-  Query,
   Req,
   UseGuards,
-  DefaultValuePipe
+  DefaultValuePipe, ValidationPipe, Query
 } from '@nestjs/common';
 import {PositionService} from "./position.service";
 import {PositionEntity} from "./position.entity";
-import {ApiBearerAuth, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiCookieAuth, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
 import * as PositionDto from './position.dto';
 import {AuthGuard} from "@nestjs/passport";
+import {FindManyOptions} from "typeorm";
+import {find} from "rxjs/operators";
 
-@ApiBearerAuth()
+@ApiCookieAuth()
 @ApiTags('Position')
 @Controller('api/v1/position')
 @UseGuards(AuthGuard('jwt'))
@@ -32,10 +33,27 @@ export class PositionController {
   @ApiResponse({status: 200, description: 'Result records'})
   @ApiQuery({name: 'skip', schema: {required: ['false']}})
   async getPositions(
-    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip: number,
-    @Query('take', new DefaultValuePipe(20), ParseIntPipe) take: number,
-  ): Promise<PositionEntity[]> {
-    return this.positionService.find({take:take, skip:skip});
+    @Query() query: PositionDto.GetRequestDto, //datatable server-side format
+    @Query('start', new DefaultValuePipe(0), ParseIntPipe) skip: number,
+    @Query('length', new DefaultValuePipe(20), ParseIntPipe) take: number,
+    @Req() req
+  ): Promise<PositionDto.GetResponseDto> {
+    const response = new PositionDto.GetResponseDto();
+    const findOptions: FindManyOptions = {};
+    response.draw = query.draw ? parseInt(query.draw) : null;
+    response.recordsTotal = await this.positionService.count();
+    if (query.order) {
+      const columnId = query.order[0].column ?? null;
+      const direction = query.order[0].dir === 'asc' ? 1 : -1;
+      const column = query.columns[columnId];
+      const columnName = column.data;
+      findOptions['order'] = {[columnName]: direction};
+    }
+    findOptions['relations'] = ['chiefPosition'];
+    const positions = await this.positionService.find(Object.assign(findOptions, {take:take, skip:skip}));
+    response.data = positions;
+    response.recordsFiltered = await this.positionService.count(findOptions);
+    return response;
   }
 
   @Post()

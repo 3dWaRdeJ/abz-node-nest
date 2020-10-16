@@ -11,13 +11,12 @@ import {
   Query, Req, UploadedFiles,
   UseGuards, UseInterceptors,
 } from '@nestjs/common';
-import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger";
+import { ApiConsumes, ApiCookieAuth, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {AuthGuard} from "@nestjs/passport";
 import {EmployeeService} from "./employee.service";
 import {EmployeeEntity} from "./employee.entity";
 import * as EmployeeDto from './employee.dto';
 import {FilesInterceptor} from "@nestjs/platform-express";
-import {Observable} from "rxjs";
 import * as path from 'path';
 import {MulterOptions} from "@nestjs/platform-express/multer/interfaces/multer-options.interface";
 import * as multer from 'multer'
@@ -25,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import {EntityNotFoundError} from "typeorm/error/EntityNotFoundError";
 import * as sizeOf from 'image-size';
+import {ApiImplicitFile} from "@nestjs/swagger/dist/decorators/api-implicit-file.decorator";
 
 //image format filter
 const photoFilter = (req, file, callback) => {
@@ -61,7 +61,7 @@ const fileOptions: MulterOptions = {
   })
 }
 
-@ApiBearerAuth()
+@ApiCookieAuth()
 @ApiTags('Employee')
 @Controller('api/v1/employee')
 @UseGuards(AuthGuard('jwt'))
@@ -128,6 +128,8 @@ export class EmployeeController {
   }
 
   @Post(':id/file')
+  @ApiConsumes('multipart/form-data')
+  @ApiImplicitFile({name: 'photo', required: true, description: 'employee photo'})
   @ApiResponse({status: 200, description: 'upload employee photo'})
   @UseInterceptors(FilesInterceptor('photo', 1, fileOptions))
   async uploadPhoto(

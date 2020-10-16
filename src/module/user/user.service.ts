@@ -39,7 +39,7 @@ export class UserService {
     if (user) {
       return user;
     }
-    throw new NotFoundException('User with this email does not exist');
+    throw new NotFoundException(['User with this id does not exist']);
   }
 
   create(createDto: UserDto.CreateDto): Promise<UserEntity> {
@@ -47,8 +47,12 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
-  findByEmail(email: string): Promise<UserEntity> {
-    return this.userRepository.findOne({where: [{email: email}]});
+  async findByEmail(email: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({where: [{email: email}]});
+    if (user) {
+      return  user;
+    }
+    throw new NotFoundException(['User with this email does not exist']);
   }
 
   async remove(id: number| string): Promise<void> {

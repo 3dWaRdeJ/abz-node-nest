@@ -14,10 +14,16 @@ lerna-debug.log*
 .env
 
 #static
-/public
 
 #adminBro
 .adminbro/
+
+#adminLte
+public/admin-lte/
+
+#img
+public/img/
+
 
 # OS
 .DS_Store

@@ -26,6 +26,10 @@ export class PositionService {
     return this.positionRepository.findOne(id, findOptions);
   }
 
+  async count(options?: FindManyOptions): Promise<number> {
+    return this.positionRepository.count(options);
+  }
+
   private async save(position): Promise<PositionEntity> {
     return this.positionRepository.save(position);
   }
@@ -34,12 +38,12 @@ export class PositionService {
     await this.positionRepository.delete(id);
   }
 
-  async checkIfExist(id: number, findOptions?: FindOneOptions): Promise<PositionEntity> {
+  async checkIfExist(id: number, findOptions?: FindOneOptions, paramName?: string): Promise<PositionEntity> {
     try {
       return await this.findByIdOrFail(id, findOptions);
     } catch (err) {
       if (err instanceof EntityNotFoundError) {
-        throw new UnprocessableEntityException(`Position with id=${id} not found`)
+        throw new UnprocessableEntityException(`${paramName ?? 'id'} Position with id=${id} not found`)
       }
       throw err;
     }
@@ -81,7 +85,7 @@ export class PositionService {
       .execute();
   }
 
-  async validateChiefPosition(position: PositionEntity): Promise<PositionEntity> {
+  async validateChiefPosition(position: PositionEntity, paramName?: string): Promise<PositionEntity> {
     //add chief position to field, if not set
     if (!position.chiefPosition && typeof position.chief_position_id === 'number') {
       position.chiefPosition = await this.checkIfExist(position.chief_position_id);
@@ -91,7 +95,7 @@ export class PositionService {
     if (position.chiefPosition instanceof PositionEntity) {
       //validate chief position level
       if (position.chiefPosition.level === 1) {
-        throw new ConflictException('Chief position level must be > 1')
+        throw new ConflictException([`${paramName ?? 'chief_position_id'} Chief position level must be > 1`])
       }
 
       position.level = position.chiefPosition.level - 1;
