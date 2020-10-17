@@ -1,11 +1,26 @@
-import {Entity, Column, PrimaryGeneratedColumn, BaseEntity, Index, OneToMany, BeforeUpdate} from 'typeorm';
+import {
+    Entity,
+    Column,
+    BaseEntity,
+    Index,
+    OneToMany,
+    BeforeUpdate,
+    BeforeInsert
+} from 'typeorm';
 import {PositionEntity} from "../position/position.entity";
 import {EmployeeEntity} from "../employee/employee.entity";
+import { CurrentAdmin } from "admin-bro/src/current-admin.interface"
+import {v4} from 'uuid';
 
 @Entity('users')
-export class UserEntity extends BaseEntity{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class UserEntity extends BaseEntity implements CurrentAdmin{
+    @Column({name: 'id', nullable: false, primary: true, type: 'varchar', length: 36})
+    id: string;
+
+    @BeforeInsert()
+    generateUUID() {
+        this.id = v4();
+    }
 
     @Column()
     name: string;

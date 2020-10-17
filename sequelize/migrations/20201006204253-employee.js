@@ -56,7 +56,7 @@ module.exports = {
       },
       'admin_create_id': {
         allowNull: false,
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.STRING(36),
         references: {
           model: 'users',
           key: 'id'
@@ -65,7 +65,7 @@ module.exports = {
       },
       'admin_update_id': {
         allowNull: false,
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.STRING(36),
         references: {
           model: 'users',
           key: 'id'

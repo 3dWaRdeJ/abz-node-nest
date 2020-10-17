@@ -15,7 +15,7 @@ module.exports = {
         email: 'root@test.com',
         password: bcrypt.hashSync('root', bcrypt.genSaltSync(10))
       }
-    ], {fields: ['name', 'email', 'password']});
+    ], {fields: ['id', 'name', 'email', 'password']});
   },
 
   down: async (queryInterface, Sequelize) => {

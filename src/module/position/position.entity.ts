@@ -12,7 +12,6 @@ import {
 } from 'typeorm';
 import {UserEntity} from "../user/user.entity";
 import {EmployeeEntity} from "../employee/employee.entity";
-import {Req} from "@nestjs/common";
 
 @Entity('positions')
 export class PositionEntity extends BaseEntity{
@@ -47,10 +46,10 @@ export class PositionEntity extends BaseEntity{
     @OneToMany(() => PositionEntity, position => position.chiefPosition)
     subPositions: PositionEntity[];
 
-    @Column({name: 'admin_create_id', type: 'integer', nullable: false})
+    @Column({name: 'admin_create_id', type: 'varchar', length: 36, nullable: false})
     @RelationId((position: PositionEntity) => position.createAdmin)
     @Index('admin_create_IDX')
-    admin_create_id: number;
+    admin_create_id: string;
 
     @ManyToOne(
       () => UserEntity,
@@ -60,10 +59,10 @@ export class PositionEntity extends BaseEntity{
     @JoinColumn({name: 'admin_create_id', referencedColumnName: 'id'})
     createAdmin: UserEntity;
 
-    @Column({name: 'admin_update_id', type: 'integer', nullable: false})
+    @Column({name: 'admin_update_id', type: 'varchar', length: 36, nullable: false})
     @RelationId((position: PositionEntity) => position.updateAdmin)
     @Index('admin_update_IDX')
-    admin_update_id: number;
+    admin_update_id: string;
 
     @ManyToOne(
       () => UserEntity,
@@ -97,8 +96,15 @@ export class PositionEntity extends BaseEntity{
     @BeforeInsert()
     @BeforeUpdate()
     setDefaultLevelIfNotSet() {
-        if (this.level === null) {
+        if (!this.level) {
             this.level = PositionEntity.MAX_LEVEL;
         }
+    }
+
+    static validateChiefPosition(chiefPosition: PositionEntity) {
+        if (chiefPosition.level > 2) {
+            return false;
+        }
+        return true;
     }
 }

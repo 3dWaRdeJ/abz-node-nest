@@ -87,7 +87,7 @@ export class EmployeeEntity extends BaseEntity{
   @JoinColumn({name: 'position_id'})
   position: PositionEntity;
 
-  @Column({name: 'admin_create_id', type: 'integer', nullable: false})
+  @Column({name: 'admin_create_id', type: 'varchar', length: 36, nullable: false})
   @RelationId((employee: EmployeeEntity) => employee.createAdmin)
   @Index('admin_create_IDX')
   admin_create_id: number;
@@ -100,7 +100,7 @@ export class EmployeeEntity extends BaseEntity{
   @JoinColumn({name: 'admin_create_id'})
   createAdmin: UserEntity;
 
-  @Column({name: 'admin_update_id', type: 'integer', nullable: false})
+  @Column({name: 'admin_update_id', type: 'varchar', length: 36, nullable: false})
   @RelationId((employee: EmployeeEntity) => employee.updateAdmin)
   @Index('admin_update_IDX')
   admin_update_id: number;
@@ -128,18 +128,4 @@ export class EmployeeEntity extends BaseEntity{
     default: () => 'NOW() ON UPDATE NOW()'
   })
   updated_at: Date;
-
-  deletePhoto(publicDir: string) {
-    if (this.photo_path !== null && this.photo_path !== EmployeeEntity.DEFAULT_PHOTO_PATH) {
-      if (fs.existsSync(path.join(publicDir, this.photo_path))) {
-        fs.unlinkSync(path.join(publicDir, this.photo_path));
-      }
-    }
-    this.photo_path = null;
-  }
-
-  updatePhoto(publicDir: string, filename: string) {
-    this.deletePhoto(publicDir);
-    this.photo_path = path.join(EmployeeEntity.DEFAULT_PHOTO_DIR, filename);
-  }
 }

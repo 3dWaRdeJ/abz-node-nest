@@ -2,6 +2,9 @@
 const {
   Model
 } = require('sequelize');
+
+const uuid = require('uuid');
+
 module.exports = (sequelize, DataTypes) => {
   class user extends Model {
     /**
@@ -24,5 +27,12 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'user',
     timestamps: false
   });
+  user.beforeCreate(user => user.id = uuid.v4());
+  user.beforeBulkCreate((users) => {
+    for(const key in users) {
+      users[key].id = uuid.v4();
+    }
+    return users;
+  })
   return user;
 };
