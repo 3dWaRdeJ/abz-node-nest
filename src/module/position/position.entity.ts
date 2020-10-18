@@ -100,11 +100,4 @@ export class PositionEntity extends BaseEntity{
             this.level = PositionEntity.MAX_LEVEL;
         }
     }
-
-    static validateChiefPosition(chiefPosition: PositionEntity) {
-        if (chiefPosition.level > 2) {
-            return false;
-        }
-        return true;
-    }
 }

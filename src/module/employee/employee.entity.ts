@@ -11,14 +11,15 @@ import {
 } from 'typeorm';
 import {PositionEntity} from "../position/position.entity";
 import {UserEntity} from "../user/user.entity";
-import * as fs from 'fs';
-import * as path from 'path'
 
 @Entity('employees')
 export class EmployeeEntity extends BaseEntity{
   static DEFAULT_PHOTO_DIR = '/img';
-  static DEFAULT_PHOTO_PATH = EmployeeEntity.DEFAULT_PHOTO_DIR + '/default.png';
+  static DEFAULT_PHOTO_FILE = EmployeeEntity.DEFAULT_PHOTO_DIR + '/default.png';
   static MAX_SALARY = 500000;
+  static PHOTO_MIN_DIMENSION = {width: 300, height: 300};
+  static PHOTO_MAX_SIZE = 5 * 1024 * 1025;
+  static PHOTO_MIME_TYPES = ['image/png', "image/jpeg"];
 
   @PrimaryGeneratedColumn()
   id: number;
@@ -53,7 +54,7 @@ export class EmployeeEntity extends BaseEntity{
   @AfterLoad()
   setDefaultPhotoPathIfNull() {
     if (this.photo_path === null) {
-      this.photo_path = EmployeeEntity.DEFAULT_PHOTO_PATH;
+      this.photo_path = EmployeeEntity.DEFAULT_PHOTO_FILE;
     }
   }
 

@@ -19,7 +19,7 @@ async function employeeFactory(positions, employeeCount = 1000) {
       salary: parseFloat(randomValue(50000) + 1 + '.' + randomValue(100)),
       'start_date': faker.date.between(1970, new Date),
       phone: faker.phone.phoneNumber('+380#########'),
-      email: faker.internet.email(),
+      email: faker.internet.email().toLowerCase(),
       'position_id': positions[i % positions.length].id,
       'admin_create_id': randomAdmin.id,
       'admin_update_id': randomAdmin.id
