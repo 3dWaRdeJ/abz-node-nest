@@ -51,13 +51,6 @@ export class EmployeeEntity extends BaseEntity{
   @Column({name: 'photo_path', nullable: true})
   photo_path?: string;
 
-  @AfterLoad()
-  setDefaultPhotoPathIfNull() {
-    if (this.photo_path === null) {
-      this.photo_path = EmployeeEntity.DEFAULT_PHOTO_FILE;
-    }
-  }
-
   @Column({name: 'chief_id', type: 'integer', nullable: true})
   @RelationId((employee: EmployeeEntity) => employee.chief)
   @Index('chief_IDX')

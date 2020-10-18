@@ -230,12 +230,11 @@ export const EmployeeResource: ResourceOptions = {
             admin_create_id: currentAdmin.id,
             admin_update_id: currentAdmin.id,
           }
-          return request
-        },
-        aftre: async (request, {record, currentAdmin}) => {
-          const employeeRep = getRepository(EmployeeEntity);
+          if (request.files.photo) {
+            request.payload.photo_path = request.files.photo.name;
+          }
 
-          return request;
+          return request
         }
       },
       edit: {
@@ -245,8 +244,16 @@ export const EmployeeResource: ResourceOptions = {
             await validateEmployee(request);
 
             if (request.files.photo) {
-              request.payload.photo_path = path.join(EmployeeEntity.DEFAULT_PHOTO_DIR, request.payload.id, request.files.photo.name);
+              request.payload.photo_path = path.join(EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id, request.files.photo.name);
             }
+            fsExt.removeSync(
+              path.resolve(
+                path.join(
+                  __dirname, '..', '..', '..', '..', '..',
+                  'public', EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id.toString() ,record.params.photo_path,
+                )
+              )
+            );
             request.payload = {
               ...request.payload,
               created_at: undefined,
@@ -255,6 +262,20 @@ export const EmployeeResource: ResourceOptions = {
             }
           }
           return request
+        }
+      },
+      delete: {
+        before: async (request, {record}) => {
+          if (record.params.photo_path) {
+            const filePath = path.join(
+              __dirname, '..', '..', '..', '..', '..',
+              'public', EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id.toString() ,record.params.photo_path,
+            )
+            if (fsExt.pathExistsSync(filePath)) {
+              fsExt.removeSync(filePath);
+            }
+          }
+          return request;
         }
       }
     }

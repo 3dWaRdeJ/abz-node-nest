@@ -49,10 +49,7 @@ function checkName(name: string, errors: PropertyErrors): boolean {
 }
 
 function validateChiefPosition(chiefPosition: PositionEntity) {
-  if (chiefPosition.level > 2) {
-    return false;
-  }
-  return true;
+  return chiefPosition.level <= 2;
 }
 
 async function validatePosition(newPosition: PositionEntity): Promise<boolean> {
