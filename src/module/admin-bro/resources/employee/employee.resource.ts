@@ -8,6 +8,7 @@ import * as sizeOf from 'image-size';
 import {getRepository} from "typeorm";
 import {PositionEntity} from "../../../position/position.entity";
 import {RecordError} from "admin-bro/types/src/backend/utils/validation-error";
+import AdminBro from "admin-bro";
 
 function checkName(name: string, errors: PropertyErrors): boolean {
   if (name.length < 3 ) {
@@ -166,7 +167,16 @@ export const EmployeeResource: ResourceOptions = {
   options: {
     properties: {
       id: {position:0},
-      full_name: {position:1, type:'string', isTitle: true, isRequired: true},
+      full_name: {
+        position:1,
+        type:'string',
+        isTitle: true,
+        isRequired: true,
+        components: {
+          list: AdminBro.bundle('./employee-photo.list.component.tsx'),
+          show: AdminBro.bundle('./employee-photo.show.component.tsx')
+        }
+      },
       position_id: {position:2, type: 'reference', isRequired: true},
       start_date: {position:3, type: 'date', isRequired: true},
       phone: {position:4, typr: 'string', isRequired: true},
@@ -244,16 +254,17 @@ export const EmployeeResource: ResourceOptions = {
             await validateEmployee(request);
 
             if (request.files.photo) {
-              request.payload.photo_path = path.join(EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id, request.files.photo.name);
+              request.payload.photo_path = path.join(EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id.toString(), request.files.photo.name);
             }
-            fsExt.removeSync(
-              path.resolve(
-                path.join(
-                  __dirname, '..', '..', '..', '..', '..',
-                  'public', EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id.toString() ,record.params.photo_path,
-                )
-              )
-            );
+            if (record.params.photo_path) {
+              const oldPhoto = path.join(
+                __dirname, '..', '..', '..', '..', '..',
+                'public', EmployeeEntity.DEFAULT_PHOTO_DIR, record.params.id.toString(), record.params.photo_path,
+              );
+              if (fsExt.pathExistsSync(oldPhoto)) {
+                fsExt.removeSync(oldPhoto);
+              }
+            }
             request.payload = {
               ...request.payload,
               created_at: undefined,

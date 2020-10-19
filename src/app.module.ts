@@ -9,6 +9,8 @@ import { EmployeeModule } from './module/employee/employee.module';
 import {EmployeeEntity} from "./module/employee/employee.entity";
 import {UserEntity} from "./module/user/user.entity";
 import { AdminBroModule } from './module/admin-bro/admin-bro.module';
+import {ServeStaticModule} from "@nestjs/serve-static";
+import * as path from 'path';
 
 const env = process.env;
 AdminBro.registerAdapter({ Database, Resource })
@@ -31,6 +33,9 @@ AdminBro.registerAdapter({ Database, Resource })
       ],
       synchronize: env.DB_SYNC === 'true',
       logging: env.DB_LOGING === 'true'
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: path.join(__dirname, '..', 'public'),
     }),
     PositionModule,
     EmployeeModule,

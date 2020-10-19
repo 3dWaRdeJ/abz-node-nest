@@ -31,9 +31,9 @@ const localResources = {...EmployeeLocaleResource, ...PositionLocaleResource, ..
         branding: {
           companyName: 'ABZ task node-nest-adminbro'
         },
-        rootPath: '/',
-        loginPath: '/login',
-        logoutPath: '/logout',
+        rootPath: '/admin',
+        // loginPath: '/login',
+        // logoutPath: '/logout',
         resources: resources,
         locale: {
           language: 'en',
